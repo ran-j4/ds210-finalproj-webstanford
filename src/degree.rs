@@ -1,9 +1,9 @@
-// Degree Module -- computes in and out degree distributions and provides a count sorter function
+// Degree Module -- computes in and out degree distributions and provides a sorter function that works based on an enum
 use std::collections::HashMap;
 pub struct DegreeDistributions {
     pub in_degrees: HashMap<usize, usize>,
     pub out_degrees: HashMap<usize, usize>,
-} // DegreeDistributions struct to create a datatype that stores both in and out degree distributions of a graph,
+} // DegreeDistributions struct to create a datatype that stores both in and out degree distributions of a graph (as I said in my project proposal),
   // and is used for calling specific distribution to conduct log transforming, regression, and plotting operations.
 
 pub fn compute_degree_distribution(graph: &Vec<Vec<usize>>) -> DegreeDistributions {
@@ -46,21 +46,39 @@ pub fn compute_degree_distribution(graph: &Vec<Vec<usize>>) -> DegreeDistributio
     }
 }
 
-pub fn sort_by_count(degree_dist: &HashMap<usize, usize>) -> Vec<(usize, usize)> {
-    // Sort By Count Function:
-    // Takes a degree distribution HashMap, sorts by counts in descending order (highest to lowest), and returns vector of tuples.
+pub enum SortCriterion {
+    ByCount,
+    ByDegree,
+} // enum used for determining criteria for sorting degree distribution
+
+pub fn sort_degree_distribution(
+    degree_dist: &HashMap<usize, usize>,
+    criterion: SortCriterion,
+) -> Vec<(usize, usize)> {
+    // Sort Degree Distribution Function:
+    // Takes a degree distribution HashMap and a criterion for sorting, then sorts distribution by criterion, and returns vector of tuples.
     //
     // Inputs:
     // • Degree Distribution reference (HashMap with degree and count)
+    // • Criterion -- referring to sorting method as ByCount or ByDegree, based on SortCriterion enum
     //
     // Outputs:
     // • Vector consisting of tuples of degree and count.
     //
     // Key Logic:
     // • Iterate through degree distribution and collect values into a vector,
-    // then sort vector by key and reverse counts before iterating through references and collecting actual values.
+    // then sort vector by matching criterion, then iterate through references, and collect + return actual values.
     let mut sorted_vec: Vec<_> = degree_dist.iter().collect();
-    sorted_vec.sort_by_key(|&(_degree, &count)| std::cmp::Reverse(count));
+
+    match criterion {
+        SortCriterion::ByCount => {
+            sorted_vec.sort_by_key(|&(_degree, &count)| std::cmp::Reverse(count));
+        }
+
+        SortCriterion::ByDegree => {
+            sorted_vec.sort_by_key(|&(degree, _count)| std::cmp::Reverse(degree));
+        }
+    }
     sorted_vec
         .into_iter()
         .map(|(&deg, &cnt)| (deg, cnt))

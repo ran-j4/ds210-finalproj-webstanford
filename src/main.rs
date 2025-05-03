@@ -1,11 +1,11 @@
-use degree::sort_by_count;
+use degree::{sort_degree_distribution, SortCriterion};
 use plotting::*;
 use regression::*;
 use transform::log_transform;
 
-mod degree; // Module for computing the in and out degree distributions, with a sort counting function to sort distributions by count descending
-mod graph; // Module for parsing the file content / data into a graph
-mod plotting; // Module for creating a log-log plot using points and linear regression metrics (slope + intercept)
+mod degree; // Module for computing the in and out degree distributions, with a sort function to sort distributions by degree or count.
+mod graph; // Module for parsing the file content / data into a graph.
+mod plotting; // Module for creating a log-log plot using points and linear regression metrics (slope + intercept).
 mod regression; // Module for performing a linear regression and return slope + intercept, with additional r-squared value function.
 mod transform; // Module for taking points and log transforming them.
 
@@ -14,7 +14,8 @@ fn main() {
     //
     // Usecase:
     // • Return the # of nodes in the graph using parse graph function in graph module.
-    // • Return top 5 in-degree and out-degree counts in the graph by highest counts using compute degree distribution function in degree module.
+    // • Return top 5 in-degree and out-degree counts in the graph by highest counts using compute degree distribution and sort degree distribution function in the degree module.
+    // • Return top 5 in-degree and out-degree degrees in the graph by highest degree using compute degree distribution and sort degree distribution function in the degree module.
     // • Return distribution metrics (in and out degree) by calculating log degrees, log counts, slope, intercept, power-law estimates, and r-squared values -
     // using the log transform function in transform module along with linear regression and r-squared functions in regression module.
     // • Finally, create in and out-degree fit plots using the log log plot function in the plotting module.
@@ -25,13 +26,26 @@ fn main() {
     let degree_dists = degree::compute_degree_distribution(&graph);
 
     println!("\nTop in-degree counts:");
-    let sorted_indeg = sort_by_count(&degree_dists.in_degrees);
+    let sorted_indeg = sort_degree_distribution(&degree_dists.in_degrees, SortCriterion::ByCount);
     for (deg, count) in sorted_indeg.iter().take(5) {
         println!("Degree {}: {} nodes", deg, count);
     }
 
     println!("\nTop out-degree counts:");
-    let sorted_outdeg = sort_by_count(&degree_dists.out_degrees);
+    let sorted_outdeg = sort_degree_distribution(&degree_dists.out_degrees, SortCriterion::ByCount);
+    for (deg, count) in sorted_outdeg.iter().take(5) {
+        println!("Degree {}: {} nodes", deg, count);
+    }
+
+    println!("\nTop in-degree Degrees:");
+    let sorted_indeg = sort_degree_distribution(&degree_dists.in_degrees, SortCriterion::ByDegree);
+    for (deg, count) in sorted_indeg.iter().take(5) {
+        println!("Degree {}: {} nodes", deg, count);
+    }
+
+    println!("\nTop out-degree Degrees:");
+    let sorted_outdeg =
+        sort_degree_distribution(&degree_dists.out_degrees, SortCriterion::ByDegree);
     for (deg, count) in sorted_outdeg.iter().take(5) {
         println!("Degree {}: {} nodes", deg, count);
     }
